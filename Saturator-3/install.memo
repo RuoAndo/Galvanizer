@@ -1,0 +1,6 @@
+apt-get install memcached
+apt-get install python-memcache
+apt-get install python-pymongo
+apt-get install python-numpy
+apt-get install global
+

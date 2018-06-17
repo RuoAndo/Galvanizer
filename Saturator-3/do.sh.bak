@@ -1,0 +1,20 @@
+pwd=`pwd | awk -F'/' '{print $NF}'`
+pwd2=`echo $pwd | sed -e "s/\./_/g"`
+pwd3=`echo $pwd2 | sed -e "s/\-/_/g"`
+echo $pwd3
+
+gtags -v
+./listup.pl > list
+./global-t.sh list > flist
+./cut.pl flist > flist2
+./drem.pl flist2 > flist2-drem
+./global-rx.sh flist2-drem > flist3
+./flist_to_csv.pl flist > flist.csv
+./flist_to_csv.pl flist3 > list-callchain.csv
+
+# store 
+python store_gtags_f_flist.py flist.csv $pwd3 192.168.11.4
+python store_gtags_rx_callchain.py list-callchain.csv $pwd3 192.168.11.4
+
+# numpy
+python csvread.py list-callchain.csv $pwd3 192.168.11.4 192.168.11.4

@@ -1,0 +1,106 @@
+# sample image
+
+<img src="images/saturator-sample.png" width=30% height=30%>
+
+# Overview
+
+<img src="images/mongodb-overview.jpg">
+
+# MongoDB and bind-9.6.1-P1 on RedHat (Amazon EC2 RH instance)
+
+install editor, git etc.
+<pre>
+# yum install -y git emacs wget screen 
+</pre>
+
+running sample script "makelist2-rh.sh"
+
+<pre>
+bash# git clone https://github.com/RuoAndo/Saturator.git
+bash# cd mongodb
+bash# pwd
+~/Saturator/mongodb
+bash# ./makelist2-rh.sh
+</pre>
+
+Then run, 
+bash# ./mongo2.sh
+
+<pre>
+\cp -f mongodb.repo /etc/yum.repos.d/
+yum install -y mongodb-org
+sudo service mongod restart
+ 
+cd bind-9.6.1-P1
+
+curl -kL https://raw.github.com/pypa/pip/master/contrib/get-pip.py | python 
+pip install pymongo numpy
+
+currentdir=`pwd | awk -F'/' '{print $0}'`
+echo $currentdir
+
+array=( `echo $currentdir | tr -s '/' ' '`)
+last_index=`expr ${#array[@]} - 1`
+
+# print fuga
+echo ${array[${last_index}]}
+
+currentdir=${array[${last_index}]}
+
+currentdir2=`echo $currentdir | sed -e "s/\-//g"`
+echo $currentdir2
+
+currentdir3=`echo $currentdir2 | sed -e "s/\///g"`
+echo $currentdir3
+
+currentdir4=`echo $currentdir3 | sed -e "s/\.//g"`
+echo $currentdir4
+
+#####
+
+python flist2.py list-definition-$currentdir4 $currentdir4
+python flist5.py list-callchain-$currentdir4 $currentdir4
+python ex3.py $currentdir4
+</pre>
+
+Results on Amazon EC2 medium instance.
+
+<pre>
+zone_print:extern       int     zone_print (const char *mesg, const zone_t *z);:contrib/zkt/zone.h:64
+
+real    20m16.623s
+user    15m28.971s
+sys     4m41.600s
+</pre>
+
+<pre>
+processor : 0
+vendor_id : GenuineIntel
+cpu family : 6
+model : 44
+model name : Intel(R) Xeon(R) CPU E5645 @ 2.40GHz
+stepping : 2
+cpu MHz : 2000.070
+cache size : 12288 KB
+fpu : yes
+fpu_exception : yes
+cpuid level : 11
+wp : yes
+flags : fpu de tsc msr pae cx8 sep cmov pat clflush mmx fxsr sse sse2 ss ht syscall nx lm constant_tsc up rep_good nonstop_tsc pni pclmulqdq ssse3 cx16 sse4_1 sse4_2 popcnt aes hypervisor lahf_lm
+bogomips : 4000.14
+clflush size : 64
+cache_alignment : 64
+address sizes : 40 bits physical, 48 bits virtual
+power management:
+</pre>
+
+# MongoDB and xen-4.1.2 on RedHat (Amazon EC2 RH instance)
+
+<pre>
+setup_probe_watch:ret = setup_probe_watch(h);:tools/blktap/drivers/blktapctrl.c:880
+setup_probe_watch:int setup_probe_watch(struct xs_handle *h);:tools/blktap/lib/blktaplib.h:225
+
+real    90m18.398s
+user    65m3.652s
+sys     24m33.102s
+</pre>

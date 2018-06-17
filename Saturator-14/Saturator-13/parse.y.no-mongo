@@ -1,0 +1,160 @@
+%{
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <bson.h>
+#include <mongoc.h>
+
+#include "parse.h"
+
+char tmp_string[1024];
+char tmp_string_2[1024];
+
+static int block_flag = 0;
+static int func_flag = 0;
+
+static int current_line_number = 0;
+
+extern int yyparse();
+extern FILE* yyin;
+
+void yyerror(const char* s);
+%}
+%union {
+    int ival;
+    char* string;
+}
+%defines
+%locations
+
+%token INT
+%token STRING
+%token DECL
+%token UNKNOWN
+
+%type <string> STRING
+%type <string> DECL
+%type <string> UNKNOWN
+
+%code requires {
+
+  typedef struct _queue{
+    char name[50];
+    struct _queue *next;
+  }queue;
+
+  queue *head;
+  queue *tail;
+  queue *p;
+ 
+}
+
+%%
+
+input
+: input line
+    | line
+;
+
+line
+: func
+| arg
+| local_arg
+| string_list
+;
+
+func : decl_list STRING {
+  printf("%s %s \n", tmp_string_2, $2);
+  track_line_number();
+  func_flag = 1;
+ }
+
+arg :'(' string_list')' {
+  if(func_flag == 1)
+    {
+      // print_line_number();   
+      printf("func: %d: %s \n", current_line_number, tmp_string);   
+      init_tmp_string();
+    }
+  func_flag = 0;
+}
+
+local_arg :'(' string_list')' ';'{
+  print_line_number();   
+  printf("local_arg: %s \n", tmp_string);   
+  init_tmp_string();
+}
+
+// concatnetion f(x,y) - x,y. 
+
+string_list : STRING {
+  sprintf(tmp_string, "%s", $1);
+ }
+|
+string_list STRING {
+  sprintf(tmp_string, "%s %s", tmp_string, $2);
+}
+|
+string_list ',' STRING {
+  sprintf(tmp_string, "%s, %s", tmp_string, $3);
+}
+
+decl_list : DECL {
+  sprintf(tmp_string_2, "%s", $1);
+  printf("test1: %s \n", tmp_string_2);
+ }
+|
+decl_list decl_list STRING {
+  sprintf(tmp_string_2, "%s %s", tmp_string_2, $3);
+  printf("test2: %s \n", tmp_string_2);
+}
+
+%%
+
+void track_line_number()
+{
+  extern int yylineno;
+  current_line_number = yylineno;
+}
+
+void print_line_number()
+{
+  extern int yylineno;
+  printf("%d:", yylineno);
+}
+
+void init_tmp_string()
+{
+  int i;
+  for(i=0; i<1024; i++)
+    {
+      tmp_string[i] = 0;
+    }
+}
+
+void init_tmp_string_2()
+{
+  int i;
+  for(i=0; i<1024; i++)
+    {
+      tmp_string_2[i] = 0;
+    }
+}
+
+int main(int argc, char *argv[]) {
+    extern int yylineno;
+    yyin = stdin;
+
+    yylloc.first_line   = yylloc.last_line   = 1;
+    yylloc.first_column = yylloc.last_column = 0;
+
+    do {
+        yyparse();
+    } while(!feof(yyin));
+}
+
+void yyerror(const char* s) {
+    extern int yylineno;
+    //fprintf(stderr, "**ERROR** at nearby line %d: %s\n", yylineno, s);
+}
+

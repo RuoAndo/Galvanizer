@@ -1,0 +1,13 @@
+libxl_list_cpupool,START
+libxl_cpupool_cpuremove_node,libxl_list_cpupool,tools/libxl/libxl.c
+libxl_cpuid_destroy,libxl_cpupool_cpuremove_node,tools/libxl/libxl.h
+libxl_cpuid_destroy,libxl_cpuid_destroy,tools/libxl/libxl.h
+main_cpupoolcpuremove,libxl_cpupool_cpuremove_node,tools/libxl/xl_cmdimpl.c
+{int,main_cpupoolcpuremove,tools/libxl/xl.h
+EMPTY,{int
+main_cpupoolnumasplit,libxl_cpupool_cpuremove_node,tools/libxl/xl_cmdimpl.c
+libxl_cpuid_destroy,libxl_list_cpupool,tools/libxl/libxl.h
+libxl_cpuid_destroy,libxl_cpuid_destroy,tools/libxl/libxl.h
+libxl_name_to_cpupoolid,libxl_list_cpupool,tools/libxl/libxl_utils.c
+main_cpupoollist,libxl_list_cpupool,tools/libxl/xl_cmdimpl.c
+main_cpupoolnumasplit,libxl_list_cpupool,tools/libxl/xl_cmdimpl.c

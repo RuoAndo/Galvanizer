@@ -1,0 +1,13 @@
+#### INSERT ####
+function_name:zone_print
+location:contrib/zkt/zone.h
+linenumber:64
+software_version:bind961P1
+listtype: callchain
+####        ####
+isDigit:64:True
+INSERT INTO callchain (id, software_version, listtype, function_name, location, linenumber) VALUES (61023, 'bind961P1', 'callchain', 'zone_print', 'contrib/zkt/zone.h', 64);
+
+real    177m7.632s
+user    133m7.551s
+sys     38m51.767s

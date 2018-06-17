@@ -1,0 +1,3 @@
+va_start:va_start#define	va_start(ap, last) \:acconfig.h:114
+loadkeys:loadkeys(char *dirname, char *setname):bin/dnssec/dnssec-dsfromkey.c:63
+loadkey:loadkey(char *filename, unsigned char *key_buf, unsigned int key_buf_size,dns_rdata_t *rdata):bin/dnssec/dnssec-dsfromkey.c:114

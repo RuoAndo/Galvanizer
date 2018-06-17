@@ -1,0 +1,6 @@
+>>> import memcache                                                                             
+>>> mc = memcache.Client(['localhost:11211'])
+>>> val=mc.get("1000")
+>>> print val
+cache data
+

@@ -1,0 +1,2 @@
+#./path.sh xen440 libxl_list_cpupool
+python ex-list.py xen440 libxl_list_cpupool 3
