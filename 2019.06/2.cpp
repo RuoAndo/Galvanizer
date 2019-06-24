@@ -39,7 +39,7 @@ struct HashCompare {
 };
 */
 
-typedef concurrent_hash_map<string, int> CharTable;
+typedef concurrent_hash_map<string, std::vector<int>> CharTable;
 static CharTable table;   
 
 std::vector<string> timestamp;
@@ -105,7 +105,7 @@ int main( int argc, char* argv[] ) {
 	    CharTable::accessor a;
 	    // string timestamp_string to_string(timestamp
 	    table.insert(a, path);
-	    a->second += 1;   
+	    a->second.push_back(stoi(rec[1]));
 
 	    /*
 	    for(size_t c = tms.find_first_of("\""); c != string::npos; c = c = tms.find_first_of("\"")){
@@ -150,7 +150,9 @@ int main( int argc, char* argv[] ) {
 
 	for( CharTable::iterator i=table.begin(); i!=table.end(); ++i )
 	  {
-	    cout << i->first << "," <<  i->second << endl;
+	    for(auto itr = i->second.begin(); itr != i->second.end(); ++itr) {
+	 	    cout << i->first << "," <<  *itr << endl;
+	    }
 	  }
 
         utility::report_elapsed_time((tbb::tick_count::now() - mainStartTime).seconds());
