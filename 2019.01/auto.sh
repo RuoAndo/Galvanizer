@@ -1,3 +1,5 @@
+apt install -y global
+gtags -v
 time ./listup.pl > list
 time ./global-t.sh list > flist
 tim3 python 2.py flist > t.csv
