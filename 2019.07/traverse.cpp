@@ -44,6 +44,7 @@
 #include "tbb/task_scheduler_init.h"
 #include "tbb/concurrent_vector.h"
 //  #include "tbb/tbb_allocator.hz"
+#include <tbb/mutex.h>
 #include "utility.h"
 
 #include "csv.hpp"
@@ -51,7 +52,7 @@
 using namespace std;
 using namespace tbb;
 
-#define N 3
+#define N 10
 #define WORKER_THREAD_NUM N
 #define MAX_QUEUE_NUM N
 #define END_MARK_FNAME   "///"
@@ -65,11 +66,20 @@ static global_tx_lineNumber table_tx_lineNumber;
 typedef concurrent_hash_map<string, std::vector<string>> global_tx_funcName;
 static global_tx_funcName table_tx_funcName;
 
-typedef concurrent_hash_map<string, std::vector<int>> global_rx_lineNumber;
-static global_rx_lineNumber table_rx_lineNumber;
 
-typedef concurrent_hash_map<string, std::vector<string>> global_rx_funcName;
-static global_rx_funcName table_rx_funcName;   
+typedef concurrent_hash_map<string, std::vector<string>> global_callee_caller;
+static global_callee_caller table_callee_caller;
+
+typedef concurrent_hash_map<string, std::vector<string>> global_callee_caller_lineNumber;
+static global_callee_caller_lineNumber table_callee_caller_lineNumber;
+
+typedef concurrent_hash_map<string, std::vector<string>> global_callee_lineNumber;
+static global_callee_lineNumber table_callee_lineNumber;
+
+typedef concurrent_hash_map<string, std::vector<string>> global_callee_fileName;
+static global_callee_fileName table_callee_fileName;
+
+tbb::mutex countMutex;
 
 typedef struct _result {
     int num;
@@ -102,8 +112,30 @@ int traverse_file(char* filename, char* srchstr, int thread_id) {
   const string csv_file_1 = std::string(filename); 
   vector<vector<string>> data_1; 
 
+  vector<string> rx_fileName;
+  vector<string> rx_funcName;
+  vector<int> rx_lineNumber;
+
+  vector<string> tx_fileName;
+  vector<string> tx_funcName;
+  vector<int> tx_lineNumber;
+
+  string tx_fileName_str;
+  string rx_fileName_str;
+  
+  vector<int> v_lineNum;
+  vector<string> v_funcName;
+
+  int counter;
+  int counter2;
+  int m,n;
+  
+  string funcName;
+  int lineNumber;
+  string filePath;
+  
   tbb::tick_count mainStartTime = tbb::tick_count::now();
-    
+  
   try {
     Csv objCsv2(csv_file_1);
     if (!objCsv2.getCsv(data_1)) {
@@ -114,15 +146,15 @@ int traverse_file(char* filename, char* srchstr, int thread_id) {
     // cout << data_1.size() << endl;
     for (unsigned int row = 0; row < data_1.size(); row++) {
          vector<string> rec_rx = data_1[row]; 
-	 std::string path_rx = rec_rx[2];
-	    	    	    
-	 global_rx_lineNumber::accessor rx_lineNumber;
-	 table_rx_lineNumber.insert(rx_lineNumber, path_rx);
-	 rx_lineNumber->second.push_back(stoi(rec_rx[1]));	    
 
-	 global_rx_funcName::accessor rx_funcName;
-	    table_rx_funcName.insert(rx_funcName, path_rx);
-	    rx_funcName->second.push_back(rec_rx[0]);	    
+	 funcName = rec_rx[0];
+	 lineNumber = stoi(rec_rx[1]);
+	 filePath = rec_rx[2];
+	 
+	 // main,1546,drivers/gpu/drm/nouveau/nvkm/engine/gr/ctxgf100.c
+	 rx_fileName.push_back(filePath);
+	 rx_funcName.push_back(funcName);
+	 rx_lineNumber.push_back(lineNumber);
     }
   }
   catch (...) {
@@ -130,22 +162,91 @@ int traverse_file(char* filename, char* srchstr, int thread_id) {
     return 1;
   }
 
-  // cout << table_rx_lineNumber.size() << endl;
-
-  /*
-    counter = 0;
-    for( global_tx_lineNumber::iterator i=table_tx_lineNumber.begin(); i!=table_tx_lineNumber.end(); ++i )
-      {
-	    for(auto itr = i->second.begin(); itr != i->second.end(); ++itr) 
-	      counter++;
-      }
-    cout << "table_tx_lineNumber->second :" << counter << endl;   
-    cout << table_tx_funcName.size() << endl;
-  */
-
-  cout << "threadID:" << thread_id << ":" << filename << ":" << table_rx_lineNumber.size() << endl;  
+  cout << "threadID:" << thread_id << " - reading " << filename << " done." << endl;  
   utility::report_elapsed_time((tbb::tick_count::now() - mainStartTime).seconds());
+
+  global_tx_funcName::iterator j=table_tx_funcName.begin();
+  for( global_tx_lineNumber::iterator i=table_tx_lineNumber.begin(); i!=table_tx_lineNumber.end(); ++i )
+    {
+      auto k = j->second.begin();
+      counter = i->second.size();
+      for(vector<int>::iterator l = i->second.begin(); l != i->second.end(); ++l)
+	{
+	  // drivers/gpu/drm/nouveau/nvkm/engine/fifo/base.c,320,nvkm_fifo_init
+	  // cout << i->first << "," << *l << "," << *k << endl;
+
+	  filePath = string(i->first);
+	  funcName = string(*k);
+	  lineNumber = int(*l);
+
+	  tx_fileName.push_back(filePath);
+	  tx_funcName.push_back(funcName);
+	  tx_lineNumber.push_back(lineNumber);
+	  
+	  /*
+	  tx_funcName_STL.insert(std::make_pair(filePath,funcName));
+	  tx_lineNumber_STL.insert(std::make_pair(filePath, *l));
+	  */	  
+
+	  k++;
+	}
+      
+      j++;
+    }
+  /* i, j, k, l used */
+
+  cout << tx_fileName.size() << "," << tx_funcName.size() << "," << tx_lineNumber.size() << endl;
+  cout << rx_fileName.size() << "," << rx_funcName.size() << "," << rx_lineNumber.size() << endl;
+
+  for(m = 0; m < rx_funcName.size(); m++)
+    {
+      for(n = 0; n < tx_fileName.size(); n++)
+	{
+	  if(rx_fileName[m] == tx_fileName[n])
+	    {
+	      tx_fileName_str = tx_fileName[n];
+	      //cout << "HIT:" << rx_funcName[m] << "," << rx_fileName[m] << ":" << tx_fileName[n] << endl;
+	      v_lineNum.push_back(tx_lineNumber[n]);
+	      v_funcName.push_back(tx_funcName[n]);
+	    }
+	}
+      
+      int back = std::lower_bound(v_lineNum.begin() + 1, v_lineNum.end() - 1, rx_lineNumber[m]) - v_lineNum.begin();
+      int front = back - 1;
+
+      cout << "ThreadID:" << thread_id << ":" << rx_funcName[m] << "," << v_lineNum.size() << ","
+	   << rx_fileName[m] << "," << tx_fileName_str << "," << rx_lineNumber[m] << ","
+	   << v_funcName[front] << "," << v_lineNum[front] << endl;
+
+      /*
+	typedef concurrent_hash_map<string, std::vector<string>> global_callee_caller;
+	static global_callee_caller table_callee_caller;
+      */
+      
+      /*
+	global_tx_lineNumber::accessor tx_lineNumber;
+	table_tx_lineNumber.insert(tx_lineNumber, rec_tx[2]);
+	tx_lineNumber->second.push_back(stoi(rec_tx[1]));
+      */      
+
+      global_callee_caller::accessor callee_caller;
+      table_callee_caller.insert(callee_caller, rx_funcName[m]);
+      callee_caller->second.push_back(rx_fileName[m]);
+      callee_caller->second.push_back(to_string(rx_lineNumber[m]));
+      callee_caller->second.push_back(v_funcName[front]);
+      callee_caller->second.push_back(to_string(v_lineNum[front]));
+      
+      v_lineNum.clear();
+      v_funcName.clear();
+    }
+
+
   
+  /*	      
+  cout << "threadID:" << thread_id << ":" << filename << ":" << table_rx_lineNumber.size() << ":" << counter << endl;  
+  utility::report_elapsed_time((tbb::tick_count::now() - mainStartTime).seconds());
+  */  
+
   return 0;
 }
 
@@ -385,16 +486,22 @@ int main(int argc, char* argv[]) {
 
 	  cout << data_2.size() << endl;
 	  for (unsigned int row = 0; row < data_2.size(); row++) {
-	    vector<string> rec_tx = data_2[row]; 
-	    std::string path_tx = rec_tx[2];
-	    	    	    
+
+	    vector<string> rec_tx = data_2[row];
+
+	    /* inserting TBB */
 	    global_tx_lineNumber::accessor tx_lineNumber;
-	    table_tx_lineNumber.insert(tx_lineNumber, path_tx);
-	    tx_lineNumber->second.push_back(stoi(rec_tx[1]));	    
+	    table_tx_lineNumber.insert(tx_lineNumber, rec_tx[2]);
+	    tx_lineNumber->second.push_back(stoi(rec_tx[1]));
 
 	    global_tx_funcName::accessor tx_funcName;
-	    table_tx_funcName.insert(tx_funcName, path_tx);
-	    tx_funcName->second.push_back(rec_tx[0]);	    
+	    table_tx_funcName.insert(tx_funcName, rec_tx[2]);
+	    tx_funcName->second.push_back(rec_tx[0]);
+
+	    /* inserting STL */
+	    // tx_funcName.insert(std::make_pair(path_tx,rec_tx[0]));
+	    // tx_lineNumber.insert(std::make_pair(path_tx, stoi(rec_tx[1])));
+	
 	  }
     }
     catch (...) {
@@ -403,7 +510,8 @@ int main(int argc, char* argv[]) {
     }
 
     cout << table_tx_lineNumber.size() << endl;
-
+    // TX_COUNTER = table_tx_lineNumber.size();
+    
     counter = 0;
     for( global_tx_lineNumber::iterator i=table_tx_lineNumber.begin(); i!=table_tx_lineNumber.end(); ++i )
       {
@@ -412,7 +520,23 @@ int main(int argc, char* argv[]) {
       }
     cout << "table_tx_lineNumber->second :" << counter << endl;   
     cout << table_tx_funcName.size() << endl;
+
+    global_tx_funcName::iterator j=table_tx_funcName.begin();
+    for( global_tx_lineNumber::iterator i=table_tx_lineNumber.begin(); i!=table_tx_lineNumber.end(); ++i )
+      {
+	auto k = j->second.begin();
+	for(auto l = i->second.begin(); l != i->second.end(); ++l)
+	  {
+	    // cout << i->first << "," << *l << "," << *k << endl;
+	    k++;
+	  }
+	
+	j++;
+      }
     
+    cout << "table_tx_lineNumber->second :" << counter << endl;   
+    cout << table_tx_funcName.size() << endl;
+
     utility::report_elapsed_time((tbb::tick_count::now() - mainStartTime).seconds());
     
     pthread_mutex_init(&result.mutex, NULL);
@@ -426,6 +550,30 @@ int main(int argc, char* argv[]) {
     
     for (i = 1; i < thread_num; ++i) 
         pthread_join(worker[i], NULL);
- 
+
+
+    for( global_callee_caller::iterator i=table_callee_caller.begin(); i!=table_callee_caller.end(); ++i )
+      {
+
+	    counter = 0;
+	    for(auto itr = i->second.begin(); itr != i->second.end(); ++itr)
+	      {
+		if(counter == 0)
+		  cout << i->first << "<-";
+		
+		cout << *itr << ",";
+
+		counter = counter + 1;
+		
+		if(counter == 4)
+		  {
+		    cout << endl;
+		    counter = 0;
+		  }
+	      }
+
+	    // cout << endl;
+      }
+    
     return 0;
 }
