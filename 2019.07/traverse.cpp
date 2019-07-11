@@ -133,6 +133,8 @@ int traverse_file(char* filename, char* srchstr, int thread_id) {
   string funcName;
   int lineNumber;
   string filePath;
+
+  int progress_counter = 0;
   
   tbb::tick_count mainStartTime = tbb::tick_count::now();
   
@@ -214,21 +216,15 @@ int traverse_file(char* filename, char* srchstr, int thread_id) {
       int back = std::lower_bound(v_lineNum.begin() + 1, v_lineNum.end() - 1, rx_lineNumber[m]) - v_lineNum.begin();
       int front = back - 1;
 
-      cout << "ThreadID:" << thread_id << ":" << rx_funcName[m] << "," << v_lineNum.size() << ","
-	   << rx_fileName[m] << "," << tx_fileName_str << "," << rx_lineNumber[m] << ","
-	   << v_funcName[front] << "," << v_lineNum[front] << endl;
-
-      /*
-	typedef concurrent_hash_map<string, std::vector<string>> global_callee_caller;
-	static global_callee_caller table_callee_caller;
-      */
-      
-      /*
-	global_tx_lineNumber::accessor tx_lineNumber;
-	table_tx_lineNumber.insert(tx_lineNumber, rec_tx[2]);
-	tx_lineNumber->second.push_back(stoi(rec_tx[1]));
-      */      
-
+      if(progress_counter % 1000 == 0)
+	{
+	  cout << "ThreadID:" << thread_id << ":" << filename << ":[" << progress_counter << "]:" 
+	       << rx_funcName[m] << ","
+	       << v_lineNum.size() << ","
+	       << rx_fileName[m] << "," << tx_fileName_str << "," << rx_lineNumber[m] << ","
+	       << v_funcName[front] << "," << v_lineNum[front] << endl;
+	}
+	  
       global_callee_caller::accessor callee_caller;
       table_callee_caller.insert(callee_caller, rx_funcName[m]);
       callee_caller->second.push_back(rx_fileName[m]);
@@ -238,10 +234,11 @@ int traverse_file(char* filename, char* srchstr, int thread_id) {
       
       v_lineNum.clear();
       v_funcName.clear();
+
+      progress_counter++;
+      
     }
 
-
-  
   /*	      
   cout << "threadID:" << thread_id << ":" << filename << ":" << table_rx_lineNumber.size() << ":" << counter << endl;  
   utility::report_elapsed_time((tbb::tick_count::now() - mainStartTime).seconds());
@@ -452,6 +449,8 @@ int main(int argc, char* argv[]) {
     
     int cpu_num;
     int counter;
+
+    int progress_counter = 0;
     
     if (argc != 3) {
         printf("Usage: ./traverse [DIR] FILENAME \n"); return 0;
@@ -551,7 +550,10 @@ int main(int argc, char* argv[]) {
     for (i = 1; i < thread_num; ++i) 
         pthread_join(worker[i], NULL);
 
+    ofstream outputfile("test.txt");
 
+    progress_counter = 0;
+    
     for( global_callee_caller::iterator i=table_callee_caller.begin(); i!=table_callee_caller.end(); ++i )
       {
 
@@ -559,16 +561,29 @@ int main(int argc, char* argv[]) {
 	    for(auto itr = i->second.begin(); itr != i->second.end(); ++itr)
 	      {
 		if(counter == 0)
-		  cout << i->first << "<-";
-		
-		cout << *itr << ",";
+		  {
+		    // cout << i->first << "<-";
+		    outputfile << i->first << ",";
+		    
+		  }
+
+		// cout << *itr << ",";
+		outputfile << *itr << ",";
 
 		counter = counter + 1;
+		progress_counter = progress_counter + 1;
 		
 		if(counter == 4)
 		  {
-		    cout << endl;
+		    // cout << endl;
+		    outputfile << endl;
+		    
 		    counter = 0;
+		  }
+
+		if(progress_counter % 10000 == 0)
+		  {
+		    cout << progress_counter << " lines done." << endl;
 		  }
 	      }
 
