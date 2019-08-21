@@ -7,6 +7,11 @@
 </pre>
 
 <pre>
+# ls -l | wc -l
+179
+</pre>
+
+<pre>
 # grep drivers r.csv > r.csv.drivers
 # split -l 500000 r.csv.drivers
 # mkdir rx-drivers
