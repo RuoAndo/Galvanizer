@@ -1,8 +1,16 @@
 <pre>
- 2011  grep drivers r.csv > r.csv.drivers
-  2016  split -l 500000 r.csv.drivers
-   2018  mkdir rx-drivers
-    2019  mv x* ./rx-drivers/
+#define N 5
+#define WORKER_THREAD_NUM N
+#define MAX_QUEUE_NUM N
+#define END_MARK_FNAME   "///"
+#define END_MARK_FLENGTH 3
+</pre>
+
+<pre>
+# grep drivers r.csv > r.csv.drivers
+# split -l 500000 r.csv.drivers
+# mkdir rx-drivers
+# mv x* ./rx-drivers/
 
 # time ./traverse2 rx-drivers t.csv
 355458457 - done.
