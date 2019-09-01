@@ -14,8 +14,9 @@ wc -l r.csv
 while read line; do
     echo $line
     time grep $line r.csv > r.csv.${line}
-    wc -l r.csv.${line}
-
+    rLines=`wc -l r.csv.${line} | cut -d " " -f 1`
+    echo $rLines
+    
     mkdir rx-${line}
     split -l $nLines r.csv.${line}
     mv x* ./rx-${line}/
@@ -23,13 +24,16 @@ while read line; do
     nFiles=`ls ./rx-${line}/ | wc -l | cut -d " " -f 1`
     echo $line" - # of files:"$nFiles
 
-    SECONDS=0
+    #SECONDS=0
+    start_time=`date +%s`
     time ./traverse2 rx-${line} t.csv
-    time=$SECONDS
-
+    #time=$SECONDS
+    end_time=`date +%s`
+    time=$((end_time - start_time))
+    
     wLines=`wc -l r.csv.${line} | wc -l | cut -d " " -f 1`
 
-    echo ${line}","${wLines}","${nFiles}","${time} >> stats
+    echo ${line}","${rLines}","${wLines}","${nFiles}","${time} >> stats
 
     echo " "
 done < list
