@@ -32,8 +32,9 @@ while read line; do
     time=$((end_time - start_time))
     
     wLines=`wc -l r.csv.${line} | wc -l | cut -d " " -f 1`
+    fLines=`grep ${line} t.csv | wc -l | cut -d " " -f 1`
 
-    echo ${line}","${rLines}","${wLines}","${nFiles}","${time} >> stats
+    echo ${line}","${rLines}","${fLines}","${time} >> stats
 
     echo " "
 done < list
