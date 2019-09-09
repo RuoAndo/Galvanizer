@@ -5,7 +5,7 @@ nLines=100000
 rm -rf rx-*
 
 #find . -maxdepth 1 -type d | grep '[a-z]' | grep -v Document | cut -c 3- > list 
-find . -maxdepth 1 -type d | grep '[a-z]' | grep -v Document | grep ipc | cut -c 3- > list 
+find . -maxdepth 1 -type d | grep '[a-z]' | grep -v Document | grep -v driver | cut -c 3- > list 
 
 rm -rf stats
 touch stats
