@@ -1,0 +1,28 @@
+26,29c26
+< 
+<   FILE *fp;
+<   fp = fopen("hyper_res.txt", "a");
+<   
+---
+>     
+38c35
+<     printf("%ld input errors were found.\n", errors);
+---
+>     printf("%d input errors were found.\n", errors);
+63c60
+<       
+---
+> 
+78,79c75
+<       Stats[CL_GENERATED]++;
+<       fprintf(fp, "%ld \n", Stats[SOS_SIZE]);
+---
+>       Stats[CL_GIVEN]++;
+110c106
+<         // printf("\nreducing weight limit to %d.\n", new_limit);
+---
+>         printf("\nreducing weight limit to %d.\n", new_limit);
+122,123d117
+<     fclose(fp);
+<     
+
