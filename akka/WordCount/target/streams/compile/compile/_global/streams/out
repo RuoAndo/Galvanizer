@@ -1,0 +1,46 @@
+[0m[[0m[31merror[0m] [0m[0m/home/flare/qiita/akka/WordCount/MapActor.scala:24:24: not found: value reply[0m[0J
+[0m[[0m[31merror[0m] [0m[0m    	case s: String => reply(map(text))[0m[0J
+[0m[[0m[31merror[0m] [0m[0m    	                  ^[0m[0J
+[0m[[0m[31merror[0m] [0m[0m/home/flare/qiita/akka/WordCount/MapActor.scala:24:34: package scala.text is not a value[0m[0J
+[0m[[0m[31merror[0m] [0m[0m    	case s: String => reply(map(text))[0m[0J
+[0m[[0m[31merror[0m] [0m[0m    	                            ^[0m[0J
+[0m[[0m[31merror[0m] [0m[0m/home/flare/qiita/akka/WordCount/MasterActor.scala:20:5: not found: value loop[0m[0J
+[0m[[0m[31merror[0m] [0m[0m    loop {[0m[0J
+[0m[[0m[31merror[0m] [0m[0m    ^[0m[0J
+[0m[[0m[31merror[0m] [0m[0m/home/flare/qiita/akka/WordCount/MasterActor.scala:21:7: not found: value react[0m[0J
+[0m[[0m[31merror[0m] [0m[0m      react {[0m[0J
+[0m[[0m[31merror[0m] [0m[0m      ^[0m[0J
+[0m[[0m[31merror[0m] [0m[0m/home/flare/qiita/akka/WordCount/MasterActor.scala:92:46: value ! is not a member of MasterActor[0m[0J
+[0m[[0m[31merror[0m] [0m[0m  if (mapOutputs.length == data.length) this ! MapCompleted[0m[0J
+[0m[[0m[31merror[0m] [0m[0m                                             ^[0m[0J
+[0m[[0m[31merror[0m] [0m[0m/home/flare/qiita/akka/WordCount/MasterActor.scala:95:57: value ! is not a member of MasterActor[0m[0J
+[0m[[0m[31merror[0m] [0m[0m  if (reduceInputs.length == reduceOutputs.length) this ! ReduceCompleted[0m[0J
+[0m[[0m[31merror[0m] [0m[0m                                                        ^[0m[0J
+[0m[[0m[31merror[0m] [0m[0m/home/flare/qiita/akka/WordCount/MasterActor.scala:35:57: value ! is not a member of akka.actor.Actor[0m[0J
+[0m[[0m[31merror[0m] [0m[0m      case x::xs => mapActors(index % mapActors.length) ! x[0m[0J
+[0m[[0m[31merror[0m] [0m[0m                                                        ^[0m[0J
+[0m[[0m[31merror[0m] [0m[0m/home/flare/qiita/akka/WordCount/MasterActor.scala:43:63: value ! is not a member of akka.actor.Actor[0m[0J
+[0m[[0m[31merror[0m] [0m[0m      case x::xs => reduceActors(index % reduceActors.length) ! x[0m[0J
+[0m[[0m[31merror[0m] [0m[0m                                                              ^[0m[0J
+[0m[[0m[31merror[0m] [0m[0m/home/flare/qiita/akka/WordCount/ReduceActor.scala:11:5: not found: value loop[0m[0J
+[0m[[0m[31merror[0m] [0m[0m    loop {[0m[0J
+[0m[[0m[31merror[0m] [0m[0m    ^[0m[0J
+[0m[[0m[31merror[0m] [0m[0m/home/flare/qiita/akka/WordCount/ReduceActor.scala:12:7: not found: value react[0m[0J
+[0m[[0m[31merror[0m] [0m[0m      react {[0m[0J
+[0m[[0m[31merror[0m] [0m[0m      ^[0m[0J
+[0m[[0m[31merror[0m] [0m[0m/home/flare/qiita/akka/WordCount/ReduceActor.scala:13:32: not found: value reply[0m[0J
+[0m[[0m[31merror[0m] [0m[0m        case i: ReduceInput => reply(reduce(i))[0m[0J
+[0m[[0m[31merror[0m] [0m[0m                               ^[0m[0J
+[0m[[0m[31merror[0m] [0m[0m/home/flare/qiita/akka/WordCount/WordCount.scala:43:37: value start is not a member of MapActor[0m[0J
+[0m[[0m[31merror[0m] [0m[0m      mapActors(i) = new MapActor().start[0m[0J
+[0m[[0m[31merror[0m] [0m[0m                                    ^[0m[0J
+[0m[[0m[31merror[0m] [0m[0m/home/flare/qiita/akka/WordCount/WordCount.scala:50:43: value start is not a member of ReduceActor[0m[0J
+[0m[[0m[31merror[0m] [0m[0m      reduceActors(i) = new ReduceActor().start[0m[0J
+[0m[[0m[31merror[0m] [0m[0m                                          ^[0m[0J
+[0m[[0m[31merror[0m] [0m[0m/home/flare/qiita/akka/WordCount/WordCount.scala:28:54: value start is not a member of MasterActor[0m[0J
+[0m[[0m[31merror[0m] [0m[0m      new MasterActor(mapActors, reduceActors, data).start[0m[0J
+[0m[[0m[31merror[0m] [0m[0m                                                     ^[0m[0J
+[0m[[0m[31merror[0m] [0m[0m/home/flare/qiita/akka/WordCount/WordCount.scala:30:5: not found: value spawn[0m[0J
+[0m[[0m[31merror[0m] [0m[0m    spawn {[0m[0J
+[0m[[0m[31merror[0m] [0m[0m    ^[0m[0J
+[0m[[0m[31merror[0m] [0m[0m15 errors found[0m[0J
