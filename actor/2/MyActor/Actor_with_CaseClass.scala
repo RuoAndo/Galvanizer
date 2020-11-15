@@ -5,7 +5,7 @@ import akka.event.Logging
 
 case class CaseClass_for_Actor(prop1: Int, prop2: String)
 
-class MyActor extends Actor {
+class Actor_with_CaseClass extends Actor {
   val log = Logging(context.system, this)
 
   def receive = {
@@ -21,11 +21,9 @@ object Main {
   def main(args: Array[String]): Unit = {
     val system = ActorSystem("mySystem")
 
-    // アクターの生成
-    val props = Props[MyActor]
+    val props = Props[Actor_with_CaseClass]
     val actor = system.actorOf(props, name = "myActor")
 
-    // ケースクラスを渡す
     val msg = new CaseClass_for_Actor(987654321, "any string")
 
     while(true) {
