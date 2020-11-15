@@ -10,16 +10,6 @@ import akka.actor.{ActorSystem,Props}
 
 class MapActor extends Actor{
 
-    /*
-    println("MapActor: Starting...")
-    loop {
-      react {
-        case text:String => reply(map(text))
-        case _ => println("MapActor: ???")
-      }
-    }
-    */
-
     def receive = {
     	case s: String => reply(map(text))
 	case _ => println("MapActor: ???")
