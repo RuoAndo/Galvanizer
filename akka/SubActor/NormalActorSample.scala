@@ -18,6 +18,10 @@ class MainActor extends Actor with ActorLogging {
   // 子のアクターの終了をモニタリング
   watch(subref)
 
+  // MasterActor
+  val MasterRef = actorOf(Props[MasterActor], name = "MasterActor")
+  watch(MasterRef)
+
   // メッセージハンドラとなるメソッド
   def receive = {
     case s: String => subref ! s		        // 子のアクターへ送信
@@ -25,21 +29,6 @@ class MainActor extends Actor with ActorLogging {
     case _ => log.warning("unknown")
   }
 }
-
-/**
- * メインのアクターから生成される子のアクターです。
- */
-/*
-class SubActor extends Actor {
-  import context._
-
-  def receive = {
-    case s: String => println("メッセージ受信: %s".format(s))
-      // 子のアクターを終了
-      stop(self)
-  }
-}
-*/
 
 /**
  * Main
@@ -61,6 +50,7 @@ object NormalActorSample extends App {
 
   // メッセージの送信
   ref ! "send message"
+  // ref ! data
 
   Thread.sleep(3000)
   // すべてのアクターを終了
