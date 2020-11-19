@@ -7,7 +7,8 @@ class SubActor extends Actor {
   import context._
 
   def receive = {
-    case s: String => println("メッセージ受信: %s".format(s))
+    case s: String => 
+    	 println("メッセージ受信: %s".format(s))
       // 子のアクターを終了
       stop(self)
   }
