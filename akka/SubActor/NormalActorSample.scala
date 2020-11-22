@@ -1,11 +1,16 @@
 //package jp.sf.amateras.scala.akka
 
 import akka.actor._
+import scala.collection.mutable.ListBuffer
 
 case class MapOutput(val entries:List[(String, Int)])
 case class ReduceInput(val key:String, val entries:List[(String, Int)])
 case class ReduceOutput(val key:String, val value:Int)
 case class Begin()
+
+case class MapCompleted()
+case class ReduceCompleted()
+
 
 /**
  * アクターを使った並行処理のサンプルです。
@@ -13,21 +18,41 @@ case class Begin()
 class MainActor extends Actor with ActorLogging {
   import context._
 
-  // 子のアクターを生成
-  val subref = actorOf(Props[SubActor], name = "subActor")
-  // 子のアクターの終了をモニタリング
-  watch(subref)
-
-  // MasterActor
-  val MasterRef = actorOf(Props[MasterActor], name = "MasterActor")
-  watch(MasterRef)
+  val mapOutputs = new ListBuffer[MapOutput]
+  val reduceInputs = new ListBuffer[ReduceInput]
+  val reduceOutputs = new ListBuffer[ReduceOutput]
 
   // メッセージハンドラとなるメソッド
   def receive = {
-    case s: String => subref ! s		        // 子のアクターへ送信
-    case Terminated(subref) => println("SubActor終了")	// 子のアクターの終了時
+  /*
+      case s: String => 
+            val words = new List[(String)]
+	    s.toString.split(' ').foreach(words += _->1)
+	    map(0, words)
+*/
+
+    // case s: String => subref ! "msg to subactor" // 子のアクターへ送信
+    // case s: String => MapRef ! s // 子のアクターへ送信
+    //case mo: MapOutput => println("MapOutput received:" + mo)
+
+         // appendMapOutput(mo); checkMapProgress
+    	 // println(sort(mo.toList))
+
+    // case MapCompleted =>
+    	 // println("MapCompleted")
+
+    // case Terminated(MapRef) => println("MapActor終了")
+    // case Terminated(subref) => println("SubActor終了")	// 子のアクターの終了時
     case _ => log.warning("unknown")
   }
+
+  def appendMapOutput(o: MapOutput) = {
+    println("MasterActor: received the response: map(" + o + ")")
+    mapOutputs += o
+  }
+
+  def checkMapProgress =
+    if (mapOutputs.length > 10) sender ! MapCompleted
 }
 
 /**
@@ -47,10 +72,28 @@ object NormalActorSample extends App {
 
   // アクターの生成
   val ref = system.actorOf(Props[MainActor], name = "mainActor")
+  // ref ! "send message"
+  
+  val MapRef = system.actorOf(Props[MapActor], name = "MapActor")
+  // watch(MapRef)
 
-  // メッセージの送信
-  ref ! "send message"
-  // ref ! data
+  var str:String = ""
+  for(element<-data) 
+    str = str + element + " "
+
+  println("Main actor:" + str)
+  ref ! str
+
+  map(0, data)
+
+  def map(index: Int, data:List[String]) {
+    data match {
+      case Nil =>
+      case x::xs => println("map:" + x)
+		    MapRef ! x
+                    map(index+1, xs)
+    }
+  }
 
   Thread.sleep(3000)
   // すべてのアクターを終了

@@ -18,10 +18,16 @@ class MapActor extends Actor {
   def receive = {
     case s: String =>
     	    println("mapActor: %s".format(s))
+	    // println(s.mkString(","))
+	    
 	    val words = new ListBuffer[(String, Int)]
-  	    s.split(' ').foreach(words += _->1)
+  	    s.toString.split(' ').foreach(words += _->1)
             println("List :" + words)
-            stop(self)
-    // case _ => println("unknown")
+	    // sender ! MapOutput(words.toList)
+            // stop(self)
+	    
+	    
+    case _ => println("unknown")
   }
 }
+
