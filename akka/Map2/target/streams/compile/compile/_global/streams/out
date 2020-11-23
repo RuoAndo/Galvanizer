@@ -1,0 +1,4 @@
+[0m[[0m[31merror[0m] [0m[0m/home/flare/Galvanizer/akka/Map2/MapSample.scala:69:11: not found: value mapOutputs[0m[0J
+[0m[[0m[31merror[0m] [0m[0m  println(mapOutputs)[0m[0J
+[0m[[0m[31merror[0m] [0m[0m          ^[0m[0J
+[0m[[0m[31merror[0m] [0m[0mone error found[0m[0J
