@@ -26,8 +26,9 @@ class MapActor extends Actor {
 	    
 	    sender ! MapOutput(words.toList)
             // stop(self)
-	    
-	    
+
+    case MapCompleted => sender ! MapCompleted
+
     case _ => println("unknown")
   }
 }

@@ -19,12 +19,16 @@ class MainActor extends Actor with ActorLogging {
   val reduceOutputs = new ListBuffer[ReduceOutput]
 
   val MapRef = system.actorOf(Props[MapActor], name = "MapActor")
+  var dataLength = 0
 
   def receive = {
     case FirstMessage(prop1) => map(0, prop1)
+    	 dataLength = prop1.length
     case mo: MapOutput =>
     	 println("MapOutput received")
-	 appendMapOutput(mo) 
+	 appendMapOutput(mo)
+	 checkMapProgress
+    case MapCompleted => println("Received: MapCompleted")
     case _ => log.warning("unknown")
   }
 
@@ -44,7 +48,7 @@ class MainActor extends Actor with ActorLogging {
   }
 
   def checkMapProgress =
-    if (mapOutputs.length > 10) sender ! MapCompleted
+    if (mapOutputs.length == dataLength) sender ! MapCompleted
 }
 
 /**
