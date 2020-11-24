@@ -21,6 +21,8 @@ class MainActor extends Actor with ActorLogging {
   val MapRef = system.actorOf(Props[MapActor], name = "MapActor")
   var dataLength = 0
 
+  val ReduceRef = system.actorOf(Props[ReduceActor], name = "ReduceActor")
+
   def receive = {
     case FirstMessage(prop1) => map(0, prop1)
     	 dataLength = prop1.length
@@ -29,6 +31,10 @@ class MainActor extends Actor with ActorLogging {
 	 appendMapOutput(mo)
 	 checkMapProgress
     case MapCompleted => println("Received: MapCompleted")
+    	 println(sort(mapOutputs.toList))
+         println(split(sort(mapOutputs.toList)))
+	 reduce(0,split(sort(mapOutputs.toList)))
+	 
     case _ => log.warning("unknown")
   }
 
@@ -41,6 +47,40 @@ class MainActor extends Actor with ActorLogging {
     }
   }
 
+  def reduce(index: Int, data:List[ReduceInput]) {
+    data match {
+      case Nil =>
+      case x::xs => ReduceRef ! x
+                    reduce(index+1, xs)
+    }
+  }
+
+  def sort(mapOutputs:List[MapOutput]) = {
+    val words = new ListBuffer[(String, Int)]
+    mapOutputs.foreach(words ++= _.entries)
+    words.toList.sortWith(_._1 < _._1)
+  }
+
+  def split(data:List[(String, Int)]): List[ReduceInput] = {
+    data match {
+      case Nil => reduceInputs.toList
+      case x::xs => {
+        var spannedXs = xs.span(_._1 == x._1)
+        reduceInputs += createReduceInput(x, spannedXs._1)
+        split(spannedXs._2)
+      }
+    }
+  }
+
+  def createReduceInput(head: (String, Int),
+                        remainder: List[(String, Int)]) = {
+    val entries = new ListBuffer[(String, Int)] += head
+    entries ++= remainder
+    val reduceInput = ReduceInput(head._1, entries.toList)
+    println("MasterActor: created: " + reduceInput)
+    reduceInput
+  }
+
   def appendMapOutput(o: MapOutput) = {
     println("MasterActor: received the response: map(" + o + ")")
     mapOutputs += o
@@ -48,7 +88,7 @@ class MainActor extends Actor with ActorLogging {
   }
 
   def checkMapProgress =
-    if (mapOutputs.length == dataLength) sender ! MapCompleted
+    if (mapOutputs.length == dataLength) MapRef ! MapCompleted
 }
 
 /**
