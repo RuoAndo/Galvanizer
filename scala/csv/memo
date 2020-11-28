@@ -1,0 +1,1 @@
+scala parse_simple_csv.scala < test_simple.csv
